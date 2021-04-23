@@ -154,8 +154,6 @@ exports.getStoresByTag = async (req, res) => {
     tags: tagQuery
   });
   const [tags, stores] = await Promise.all([tagsPromise, storesPromise]);
-
-
   res.render('tag', {
     tags,
     title: 'Tags',
