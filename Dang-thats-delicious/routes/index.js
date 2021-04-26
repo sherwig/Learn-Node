@@ -34,8 +34,8 @@ router.get('/register', userController.registerForm);
 
 //Validate the registration data
 //register the user
-//Actually log them in 
-router.post('/register', userController.registerForm);
+//Actually log them in
+router.post('/register', userController.validateRegister);
 
 
 
