@@ -56,6 +56,7 @@ exports.resize = async (req, res, next) => {
 
 //Sending to MONGO
 exports.createStore = async (req, res) => {
+  req.body.author = req.user._id;
   //adding elements from the form to a new Store
   const store = await (new Store(req.body)).save();
   //Sending to Mongo
@@ -74,13 +75,19 @@ exports.getStores = async (req, res) => {
   });
 };
 
+const confirmOwner = (store, user) =>{
+  if(!store.author.equals(user._id)){
+    throw Error('You must own the store in order to edit it')
+  }
+}
+
 exports.editStore = async (req, res) => {
   //Find the store given the ID
   const store = await Store.findOne({
     _id: req.params.id
   })
   //Confirm they are the owner of the store
-  //TODO
+  confirmOwner(store, req.user);
   //Render out the edit form so the user can update their store
   res.render('editStore', {
     title: `Edit ${store.name}`,
@@ -108,7 +115,7 @@ exports.getStoreBySlug = async (req, res, next) => {
   //Find the store from the slug we created earlier
   const store = await Store.findOne({
     slug: req.params.slug
-  });
+  }).populate('author');
   //if it isn't a store then move on with the next middleware in app.js
   if (!store) {
     return next();
@@ -120,27 +127,6 @@ exports.getStoreBySlug = async (req, res, next) => {
   });
 };
 
-
-// exports.getStoresByTag = async (req, res) => {
-//   const tag = req.params.tag;
-//
-//   const tagQuery = tag || {
-//     $exists: true
-//   };
-//   const tagsPromise = Store.getTagsList();
-//   const storesPromise = Store.find({
-//     tags: tagQuery
-//   });
-//   //Wait for multiple promises to comeback as we need to get the tags and the stores
-//   const [tags, stores] = await Promise.all([tagsPromise, storesPromise]);
-//
-//   res.render('tag', {
-//     tags,
-//     title: 'Tags',
-//     tag,
-//     stores
-//   });
-// };
 
 exports.getStoresByTag = async (req, res) => {
   const tag = req.params.tag;
